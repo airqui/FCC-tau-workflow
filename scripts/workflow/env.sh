@@ -2,7 +2,12 @@
 
 # Source this file to load the validated FCC-tau software environment.
 _fcc_tau_script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-export FCC_TAU_REPO="${FCC_TAU_REPO:-$(cd "$_fcc_tau_script_dir/../.." && pwd)}"
+_fcc_tau_resolved_repo="$(cd "$_fcc_tau_script_dir/../.." && pwd)"
+if [[ ${FCC_TAU_ENV_LOADED_REPO:-} == "$_fcc_tau_resolved_repo" ]]; then
+    unset _fcc_tau_resolved_repo _fcc_tau_script_dir
+    return 0 2>/dev/null || exit 0
+fi
+export FCC_TAU_REPO="${FCC_TAU_REPO:-$_fcc_tau_resolved_repo}"
 export FCC_TAU_CAMPAIGN="${FCC_TAU_CAMPAIGN:-ILD20260821_2k}"
 export FCC_TAU_DEPENDENCY_ROOT="${FCC_TAU_DEPENDENCY_ROOT:-${XDG_CACHE_HOME:-$HOME/.cache}/fcc-tau-workflow}"
 export ILDCONFIG_ROOT="${ILDCONFIG_ROOT:-$FCC_TAU_DEPENDENCY_ROOT/ILDConfig}"
@@ -42,4 +47,5 @@ test -d "$ILDCONFIG_ROOT/.git" || {
     echo "ERROR: ILDConfig is not at the validated commit" >&2
     return 1 2>/dev/null || exit 1
 }
-unset _fcc_tau_actual_sha256 _fcc_tau_had_nounset _fcc_tau_script_dir
+export FCC_TAU_ENV_LOADED_REPO="$_fcc_tau_resolved_repo"
+unset _fcc_tau_actual_sha256 _fcc_tau_had_nounset _fcc_tau_resolved_repo _fcc_tau_script_dir

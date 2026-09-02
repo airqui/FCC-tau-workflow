@@ -33,6 +33,8 @@ the frozen Key4hep `2026-08-21` CVMFS setup. At another site, set
 that another stack has been validated. The virtual environment inherits the
 read-only Key4hep packages while keeping the editable installation in the
 external dependency directory.
+`env.sh` is idempotent for the same repository clone, so maintained wrappers
+can validate the environment without duplicating Key4hep library paths.
 
 ## 3. Inspect the frozen configuration
 
