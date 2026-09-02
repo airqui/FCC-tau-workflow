@@ -1,0 +1,38 @@
+{
+  "schema_version": "fcc_tau_smoke_golden_v1",
+  "fixture_id": "whizard_events_033851393_event0",
+  "provenance": {
+    "historical_validation": "TRUTH_LINKER_1EVT_TEST_20260825",
+    "golden_linked_rec_sha256": "657a193593cc43862b76c56476ec5e3f6342c1d41b74b6cd7a8f50fc78dbaa2c",
+    "independent_of_consolidated_implementation": true
+  },
+  "event_count": 1,
+  "collection_counts": {
+    "EventHeader": 1,
+    "MCParticles": 64,
+    "PandoraPFOs": 4,
+    "MarlinTrkTracks": 2,
+    "PandoraClusters": 4
+  },
+  "relations": [
+    [0, 15, 10001000],
+    [1, 11, 10001000],
+    [2, 15, 100000],
+    [2, 17, 9750000],
+    [2, 18, 60000],
+    [3, 17, 510000],
+    [3, 18, 9440000]
+  ],
+  "direct": [
+    {"pfo_index": 0, "status": "assigned", "mc_index": 15, "mc_pdg": 211, "track_permille": 1000, "cluster_permille": 1000},
+    {"pfo_index": 1, "status": "assigned", "mc_index": 11, "mc_pdg": 11, "track_permille": 1000, "cluster_permille": 1000},
+    {"pfo_index": 2, "status": "assigned", "mc_index": 17, "mc_pdg": 22, "track_permille": 0, "cluster_permille": 975},
+    {"pfo_index": 3, "status": "assigned", "mc_index": 18, "mc_pdg": 22, "track_permille": 0, "cluster_permille": 944}
+  ],
+  "ancestor": [
+    {"pfo_index": 0, "status": "same_direct_selected", "mc_index": 15, "mc_pdg": 211, "depth": 0},
+    {"pfo_index": 1, "status": "same_direct_selected", "mc_index": 11, "mc_pdg": 11, "depth": 0},
+    {"pfo_index": 2, "status": "same_direct_selected", "mc_index": 17, "mc_pdg": 22, "depth": 0},
+    {"pfo_index": 3, "status": "same_direct_selected", "mc_index": 18, "mc_pdg": 22, "depth": 0}
+  ]
+}

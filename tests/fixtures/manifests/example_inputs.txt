@@ -1,0 +1,1 @@
+/data/fcc-tautau/events_000000001.stdhep.gz

@@ -1,0 +1,2 @@
+source_id	input_rec	assignment_output	candidate_output	summary_output	retained_linked_rec	expected_events
+000000001	/data/fcc-tautau/events_000000001_REC.edm4hep.root	/output/000000001_assignment.parquet	/output/000000001_candidates.parquet	/output/000000001_summary.json	-	1

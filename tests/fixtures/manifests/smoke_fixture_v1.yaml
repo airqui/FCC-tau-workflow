@@ -1,0 +1,36 @@
+schema_version: fcc_tau_smoke_fixture_v1
+fixture_id: whizard_events_033851393_event0
+status: independently_validated_historical_fixture
+site: IFIC
+source_file_id: "033851393"
+sample: W
+source_rec:
+  path: /lustre/ific.uv.es/prj/gl/abehep.flc/FCC/ILD20260821_2k/outputs/events_033851393/events_033851393_REC.edm4hep.root
+  sha256: 0cb29a4ce1b103aab4b97721b65d942e9ad344349a79bb5052fb2b1b34c527d9
+  total_events: 2000
+  smoke_events: 1
+  expected_collections:
+    - EventHeader
+    - MCParticles
+    - PandoraPFOs
+    - MarlinTrkTracks
+    - PandoraClusters
+  forbidden_output_collision: RecoMCTruthLinkTruthlinkV1
+golden_linked_rec:
+  path: /lustre/ific.uv.es/prj/gl/abehep.flc/FCC/ILD20260821_2k/trials/truth_linker_1evt/events_033851393_REC_truth_linker_1evt.edm4hep.root
+  sha256: 657a193593cc43862b76c56476ec5e3f6342c1d41b74b6cd7a8f50fc78dbaa2c
+  events: 1
+  relation_collection: RecoMCTruthLinkFCCee1Evt
+  relation_count: 7
+golden_products:
+  direct_assignment: /lustre/ific.uv.es/prj/gl/abehep.flc/FCC/ILD20260821_2k/truthlink_assignment_v1/pfo_assignments/events_033851393_pfo_assignment.parquet
+  ancestor_assignment: /lustre/ific.uv.es/prj/gl/abehep.flc/FCC/ILD20260821_2k/truthlink_assignment_ancestor_v1/pfo_assignments/events_033851393_pfo_ancestor_assignment.parquet
+  g_pfo_comparison: /lustre/ific.uv.es/prj/gl/abehep.flc/FCC/ILD20260821_2k/truth_comparison_G_Ldirect_Lancestor_v1/tables/per_file/pfo_comparison/events_033851393_pfo_comparison.parquet
+  g_selected_truth: /lustre/ific.uv.es/prj/gl/abehep.flc/FCC/ILD20260821_2k/truth_comparison_G_Ldirect_Lancestor_v1/tables/per_file/selected_truth/events_033851393_selected_truth.parquet
+provenance:
+  historical_validation: TRUTH_LINKER_1EVT_TEST_20260825
+  key4hep_release: "2026-08-21"
+  ildconfig_commit: 279b180a88597e45dfaf84f35d1b8b5358300079
+  detector: ILD_FCCee_v01
+  geometry_sha256: ab48a78ef69f6ee417233e34cffa75a0fd41742fb02130c57303f402abd87e29
+  note: The golden files predate and are independent of the consolidated implementation.
