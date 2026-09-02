@@ -1,9 +1,11 @@
 # Workflow quick start
 
-This is the one-file golden path. L_direct selects one immediate MC contributor per PFO when the frozen rule is unambiguous; L_ancestor maps that result to nearest unique selected generator-level ancestry. Commands that run simulation,
-reconstruction, truth linking, or assignment are labelled **NOT EXECUTED IN
-STAGE 4**; run them only with writable external output directories and after
-the checks immediately above them pass.
+This is the one-file golden path. L_direct selects one immediate MC contributor
+per PFO when the frozen rule is unambiguous; L_ancestor maps that result to the
+nearest unique selected generator-level ancestry. Commands below that run
+simulation, reconstruction, truth linking, or assignment perform real
+processing and write outputs. Use writable external output directories and run
+them only after the preceding checks pass.
 
 ## 1. Clone
 
@@ -54,7 +56,11 @@ expected ILDConfig commit is
 Set portable external paths; do not put event data in the clone:
 
 ```bash
-export INPUT=/path/to/events_XXXXXXXXX.stdhep.gz
+export INPUT=/path/to/events_033851393.stdhep.gz
+export FILE_STEM=$(basename "$INPUT" .gz)
+export FILE_STEM=${FILE_STEM%.stdhep}
+export SAMPLE_LABEL=W
+export SOURCE_ID=033851393
 export FCC_TAU_PRODUCTION=/path/to/writable/campaign
 export FCC_TAU_OUTPUT="$FCC_TAU_PRODUCTION/outputs"
 export FCC_TAU_TMP="$FCC_TAU_PRODUCTION/tmp"
@@ -67,26 +73,24 @@ For a one-event smoke job:
 scripts/workflow/run_chain.sh "$INPUT" 1
 ```
 
-**NOT EXECUTED IN STAGE 4.** `run_chain.sh` runs the maintained `ddsim` command
-followed by `k4run ILDReconstruction.py`. It refuses pre-existing SIM/REC
-outputs unless `--force` is explicitly supplied. Do not use `--force` without
+`run_chain.sh` performs real simulation and reconstruction: it runs the
+maintained `ddsim` command followed by `k4run ILDReconstruction.py`. It refuses
+pre-existing SIM/REC outputs unless `--force` is explicitly supplied. Verify
+the input and output paths before running it, and do not use `--force` without
 reviewing the target files.
 
 The outputs are:
 
 ```text
-$FCC_TAU_OUTPUT/<sample>/<sample>_SIM.edm4hep.root
-$FCC_TAU_OUTPUT/<sample>/<sample>_REC.edm4hep.root
+$FCC_TAU_OUTPUT/<FILE_STEM>/<FILE_STEM>_SIM.edm4hep.root
+$FCC_TAU_OUTPUT/<FILE_STEM>/<FILE_STEM>_REC.edm4hep.root
 ```
 
 ## 5. Inspect SIM and REC
 
 ```bash
-export SOURCE_ID=000000001
-export SAMPLE=$(basename "$INPUT" .gz)
-export SAMPLE=${SAMPLE%.stdhep}
-export SIM="$FCC_TAU_OUTPUT/$SAMPLE/${SAMPLE}_SIM.edm4hep.root"
-export REC="$FCC_TAU_OUTPUT/$SAMPLE/${SAMPLE}_REC.edm4hep.root"
+export SIM="$FCC_TAU_OUTPUT/$FILE_STEM/${FILE_STEM}_SIM.edm4hep.root"
+export REC="$FCC_TAU_OUTPUT/$FILE_STEM/${FILE_STEM}_REC.edm4hep.root"
 test -s "$SIM" && test -s "$REC"
 podio-dump -e 0 "$SIM"
 podio-dump -e 0 "$REC"
@@ -94,6 +98,14 @@ podio-dump -e 0 "$REC"
 
 Confirm the expected event count and the collections listed in
 [Reconstruction chain](RECONSTRUCTION_CHAIN.md#validation-after-each-stage).
+
+`FILE_STEM` is the filename-derived stem used by `run_chain.sh` for output
+paths. `SAMPLE_LABEL` is the physics/campaign label passed to association
+products, such as `W` or `P8O`; it is not a filename. For a W-style
+`events_033851393...` source, use `SOURCE_ID=033851393`. Reuse that exact
+stable ID for every REC, L_direct, L_ancestor, summary, and manifest entry
+derived from the source file. Other datasets must define an equally
+deterministic stable identifier compatible with their campaign contract.
 
 If you already have a SIM named `out_sim_edm4hep_N.root`, the maintained
 SIM-to-REC-only command is:
@@ -105,8 +117,9 @@ scripts/workflow/run_pythia_reco_job.sh \
   "$FCC_TAU_PYTHIA_SIM_ROOT/out_sim_edm4hep_1.root" 0.0
 ```
 
-**NOT EXECUTED IN STAGE 4.** This command requires the exact filename pattern
-and preserves the SIM event count with `--num-events=-1`.
+This command performs real reconstruction, requires the exact filename
+pattern, and preserves the SIM event count with `--num-events=-1`. Verify its
+input and new output location before running it.
 
 ## 6. Add truth links and build L_direct
 
@@ -124,22 +137,24 @@ condor/wrappers/run_truthlink_assignment_job.sh \
   - 1
 ```
 
-**NOT EXECUTED IN STAGE 4.** Replace the final `1` with the exact REC event
-count. Passing `-` means the temporary truth-linked REC is not retained; pass a
-non-existing target path there only when the augmented REC must be preserved.
+This command performs real REC-only truth linking and assignment. Replace the
+final `1` with the exact REC event count. Passing `-` means the temporary
+truth-linked REC is not retained; pass a non-existing target path there only
+when the augmented REC must be preserved.
 
 ## 7. Build L_ancestor
 
 ```bash
 mkdir -p "$PRODUCTS/ancestor" "$PRODUCTS/ancestor_summaries"
 condor/wrappers/run_lancestor_job.sh \
-  W "$SOURCE_ID" "$REC" \
+  "$SAMPLE_LABEL" "$SOURCE_ID" "$REC" \
   "$PRODUCTS/direct/${SOURCE_ID}_Ldirect.parquet" \
   "$PRODUCTS/ancestor/${SOURCE_ID}_Lancestor.parquet" \
   "$PRODUCTS/ancestor_summaries/${SOURCE_ID}_Lancestor.json" 1
 ```
 
-**NOT EXECUTED IN STAGE 4.** Use the same exact event count as L_direct.
+This command performs real ancestry assignment and writes outputs. Use the
+same exact event count and `SOURCE_ID` as L_direct.
 
 ## 8. Inspect the products
 
@@ -158,11 +173,21 @@ for statuses and the versioned data contract.
 
 ## 9. Hand products to TausFCCee
 
-Create a small `fcc_tau_workflow_product_manifest_v1` file using the schema in
-the analysis repository's `configs/interfaces/example_workflow_product_manifest.yaml`.
-It names the source REC, L_direct Parquet, L_ancestor Parquet, truth-definition
-version, and provenance summary. Transfer the data or make those paths visible
-to the analysis job; never add a Python import or clone-relative absolute path.
+The workflow owns both `fcc_tau_association_v1` and
+`fcc_tau_workflow_product_manifest_v1`. Copy the maintained example and replace
+its data paths with the products created above:
+
+```bash
+cp configs/examples/workflow_product_manifest_v1.example.yaml \
+  /path/to/writable/products.yaml
+```
+
+The complete example names the sample label, stable `source_file_id`, source
+REC, L_direct Parquet, L_ancestor Parquet, truth-definition version, and
+provenance summary. The authoritative event identity is
+`(sample, source_file_id, event_in_file)`; add `pfo_index` or `mc_index` for
+object identity. Transfer the data or make those paths visible to the analysis
+job; never add a Python import or clone-relative absolute path.
 
 ## 10. Run the maintained one-event regression smoke test
 

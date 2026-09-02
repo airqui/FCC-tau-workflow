@@ -82,6 +82,7 @@ scripts/workflow/prepare_inputs.sh "$FCC_TAU_DATA" "$FCC_TAU_OUTPUT"
 Write a new manifest only to a non-existing path:
 
 ```bash
+export MANIFEST=/path/to/new/campaign_manifest.csv
 scripts/workflow/prepare_inputs.sh --write "$MANIFEST" \
   "$FCC_TAU_DATA" "$FCC_TAU_OUTPUT"
 ```
@@ -100,6 +101,10 @@ visible on worker nodes because `should_transfer_files = NO`.
 For truth-link production, first build a queue from a campaign CSV:
 
 ```bash
+export CAMPAIGN_MANIFEST=/path/to/campaign_manifest.csv
+export QUEUE=/path/to/new/truthlink.queue
+export EXPECTED_TOTAL=996
+export EXPECTED_REMAINING=996
 python scripts/workflow/build_truthlink_queue.py \
   --campaign-manifest "$CAMPAIGN_MANIFEST" \
   --queue-output "$QUEUE" \
@@ -110,6 +115,8 @@ python scripts/workflow/build_truthlink_queue.py \
 Test exactly one queue row without submission:
 
 ```bash
+export ONE_JOB_QUEUE=/path/to/new/one_job.queue
+export LOG_DIR=/path/to/writable/condor-logs
 head -n 1 "$QUEUE" > "$ONE_JOB_QUEUE"
 mkdir -p "$LOG_DIR"
 condor_submit -dry-run /tmp/fcc-truthlink.job.ad \
@@ -130,14 +137,16 @@ condor_submit \
   condor/templates/truthlink_assignment_v1.sub
 ```
 
-**NOT EXECUTED IN STAGE 4.** Apply the same macro pattern to
-`tautau.sub`, `pythia_reco.sub`, `pythia_truthlink_assignment_v1.sub`, or
-`lancestor_v1.sub`, using exactly the manifest columns declared at the bottom
-of that template. Test one row first.
+The production command performs real submission. Apply the same macro pattern
+to `tautau.sub`, `pythia_reco.sub`,
+`pythia_truthlink_assignment_v1.sub`, or `lancestor_v1.sub`, using exactly the
+manifest columns declared at the bottom of that template. Test one row with
+`-dry-run` first and verify all paths before submitting.
 
 Inspect failures without continuous polling:
 
 ```bash
+export CLUSTER_ID=1234567
 condor_q "$CLUSTER_ID" -nobatch
 sed -n '1,200p' "$LOG_DIR"/*.err
 sed -n '1,200p' "$LOG_DIR"/*.out

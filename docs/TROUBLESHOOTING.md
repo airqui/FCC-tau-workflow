@@ -128,7 +128,7 @@ resolution. Do not weaken contracts or overwrite products to make a check pass.
 ## Condor path or configuration failure
 
 - **Symptom:** jobs are held, executable/input is missing, or logs cannot open.
-- **Cause:** wrong `repo_root`, `manifest`, `log_dir`, invisible shared path, or
+- **Cause:** wrong `repo_root`, `queue_file`, `log_dir`, invisible shared path, or
   missing environment variables on the worker.
 - **Diagnostic:** use `condor_submit -dry-run`, inspect `.err`, `.out`, event
   log, and `HoldReason`.

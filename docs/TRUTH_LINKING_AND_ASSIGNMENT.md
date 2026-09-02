@@ -51,28 +51,41 @@ For one file, the maintained wrapper runs both the REC-only linker and the
 L_direct extractor:
 
 ```bash
+export SOURCE_ID=033851393
+export INPUT_REC=/data/events_033851393_REC.edm4hep.root
+export ASSIGNMENT_PARQUET=/data/033851393_Ldirect.parquet
+export CANDIDATE_PARQUET=/data/033851393_Ldirect_candidates.parquet
+export SUMMARY_JSON=/data/033851393_Ldirect.json
+export RETAINED_LINKED_REC_OR_DASH=-
+export EXPECTED_EVENTS=2000
 condor/wrappers/run_truthlink_assignment_job.sh \
   "$SOURCE_ID" "$INPUT_REC" \
   "$ASSIGNMENT_PARQUET" "$CANDIDATE_PARQUET" "$SUMMARY_JSON" \
   "$RETAINED_LINKED_REC_OR_DASH" "$EXPECTED_EVENTS"
 ```
 
-**NOT EXECUTED IN STAGE 4.** `SOURCE_ID` must be exactly nine decimal digits;
-output parents must already exist; every output target must be absent. Use `-`
-for the retained-REC argument to discard the temporary linked REC after
-successful extraction.
+This command performs real truth linking and assignment and writes outputs.
+For this W-style wrapper, `SOURCE_ID` must be exactly nine decimal digits. For
+`events_033851393...`, use `SOURCE_ID=033851393` and reuse it for every product
+derived from that source. Other dataset wrappers must supply a deterministic
+stable identifier compatible with their campaign contract. Output parents
+must already exist and every output target must be absent. Use `-` for the
+retained-REC argument to discard the temporary linked REC after successful
+extraction.
 
 The steering itself reads environment variables:
 
 ```bash
+export LINKED_REC=/data/events_033851393_REC_truthlinked.edm4hep.root
 export TRUTHLINK_INPUT_REC="$INPUT_REC"
 export TRUTHLINK_OUTPUT_REC="$LINKED_REC"
 export TRUTHLINK_EVTMAX="$EXPECTED_EVENTS"
 k4run scripts/workflow/run_truthlink_linker_v1.py
 ```
 
-**NOT EXECUTED IN STAGE 4.** Prefer the wrapper because it verifies code
-checksums, constrains threading, manages scratch, and validates the products.
+The steering command performs real processing. Prefer the wrapper because it
+verifies code checksums, constrains threading, manages scratch, and validates
+the products.
 
 ## 4. Collections used
 
@@ -114,7 +127,7 @@ components are `T/1000` and `C/1000`; L_direct compares the integers exactly.
 
 Examples:
 
-- `W=3007` decodes to `T=3007`, `C=0`.
+- `W=700` decodes to `T=700`, `C=0`.
 - `W=2500400` decodes to `T=400`, `C=250` because
   `2500400 = 10000*250 + 400`.
 
@@ -177,18 +190,27 @@ not universally “the true association.”
 Run it with:
 
 ```bash
+export SAMPLE_LABEL=W
+export SOURCE_REC="$INPUT_REC"
+export ANCESTOR_PARQUET=/data/033851393_Lancestor.parquet
+export ANCESTOR_SUMMARY=/data/033851393_Lancestor.json
 condor/wrappers/run_lancestor_job.sh \
-  "$SAMPLE" "$SOURCE_ID" "$SOURCE_REC" "$ASSIGNMENT_PARQUET" \
+  "$SAMPLE_LABEL" "$SOURCE_ID" "$SOURCE_REC" "$ASSIGNMENT_PARQUET" \
   "$ANCESTOR_PARQUET" "$ANCESTOR_SUMMARY" "$EXPECTED_EVENTS"
 ```
 
-**NOT EXECUTED IN STAGE 4.**
+This command performs real ancestry assignment and writes outputs. It must use
+the same `SAMPLE_LABEL`, `SOURCE_ID`, source REC, and event count as L_direct.
 
 ## 9. Output contracts
 
-The frozen cross-repository contract is `fcc_tau_association_v1`. The analysis
-consumer accepts a `fcc_tau_workflow_product_manifest_v1` document. Identity
-fields are:
+`configs/truthlink/assignment_v1.yaml` preserves the validated W production
+configuration and assignment provenance, including W-specific campaign counts.
+It is not the universal cross-sample interface. The authoritative
+machine-readable cross-sample contract is
+`src/fcc_tau_workflow/contracts/association_v1.yaml`, named
+`fcc_tau_association_v1`. The analysis consumer accepts the workflow-owned
+`fcc_tau_workflow_product_manifest_v1` document. Identity fields are:
 
 - event: `(sample, source_file_id, event_in_file)`;
 - PFO: add `pfo_index`;
@@ -200,28 +222,30 @@ or MCParticle within that event. Assignment status, truth-definition version,
 source REC, event count, and input/checksum provenance must accompany the
 products. Packed or Cantor integer event IDs are convenience fields only.
 
-Synthetic manifest example:
+Maintained W-style manifest example (replace the data paths for a real run):
 
 ```yaml
 schema_version: fcc_tau_workflow_product_manifest_v1
 association_contract: fcc_tau_association_v1
-sample: EXAMPLE
+sample: W
 products:
-  - source_file_id: "000000001"
-    source_rec: /data/example_REC.edm4hep.root
-    direct_assignment: /data/example_Ldirect.parquet
-    ancestor_assignment: /data/example_Lancestor.parquet
+  - source_file_id: "033851393"
+    source_rec: /data/events_033851393_REC.edm4hep.root
+    direct_assignment: /data/033851393_Ldirect.parquet
+    ancestor_assignment: /data/033851393_Lancestor.parquet
     truth_definition_version: selected_truth_v1
-    input_provenance: /data/example_Ldirect.json
+    input_provenance: /data/033851393_Ldirect.json
 ```
 
-The paths are user-supplied data locations, not paths to either repository.
+The same example is available at
+`configs/examples/workflow_product_manifest_v1.example.yaml`. The paths are
+user-supplied data locations, not paths to either repository.
 
 ## 10. Validation
 
 ```bash
 python scripts/validation/validate_contracts.py
-pytest -q tests/unit
+python -m pytest -q tests/unit
 (cd "$(git rev-parse --show-toplevel)" && \
   sha256sum --check configs/truthlink/code_checksums.sha256)
 ```

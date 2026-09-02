@@ -21,8 +21,6 @@ The validated environment is Key4hep `2026-08-21`, detector
 - [Datasets and provenance](docs/DATASETS_AND_PROVENANCE.md): W, P8C, P8O,
   campaign inventory, storage, and reproducibility.
 - [Troubleshooting](docs/TROUBLESHOOTING.md): known failure symptoms and fixes.
-- [Stage-2 port record](docs/README_STAGE2_CORE.md): migration provenance and
-  internal validation boundary.
 
 ## Repository structure
 
@@ -54,6 +52,7 @@ documented external virtual environment after sourcing the stack, then install
 only this package:
 
 ```bash
+export FCC_TAU_DEPENDENCY_ROOT="$PWD/../fcc-tau-dependencies"
 python -m venv --system-site-packages "$FCC_TAU_DEPENDENCY_ROOT/venv"
 source "$FCC_TAU_DEPENDENCY_ROOT/venv/bin/activate"
 python -m pip install --no-build-isolation -e .

@@ -45,9 +45,11 @@ read-only.
 ## STDHEP to SIM
 
 `scripts/workflow/run_chain.sh` executes these maintained SIM semantics from
-the ILDConfig production directory:
+the ILDConfig production directory. The excerpt below documents the command
+assembled by the wrapper; its shell variables are wrapper internals, so use
+the copy-paste entry point in [Quick start](QUICKSTART.md#4-produce-sim-and-rec-from-one-stdhep-file):
 
-```bash
+```text
 ddsim --steeringFile ddsim_steer.py \
   --compactFile "$COMPACT_FILE" \
   --inputFiles "$LOCAL_INPUT" \
@@ -56,16 +58,18 @@ ddsim --steeringFile ddsim_steer.py \
   --crossingAngleBoost 15.e-3
 ```
 
-**NOT EXECUTED IN STAGE 4.** Compressed STDHEP is first checked with `gzip -t`
-and decompressed into the configured temporary area. The steering file pins
-the physics list, range cut, kinetic-energy threshold, Geant4-decay behavior,
-and saved process listed above.
+This command performs real simulation and writes a SIM. Compressed STDHEP is
+first checked with `gzip -t` and decompressed into the configured temporary
+area. Verify the input and output paths before running it. The steering file
+pins the physics list, range cut, kinetic-energy threshold, Geant4-decay
+behavior, and saved process listed above.
 
 ## SIM to REC
 
-The same wrapper executes:
+The same wrapper executes the following explanatory command excerpt (again,
+use the Quick-start wrapper rather than supplying these internal variables):
 
-```bash
+```text
 k4run ILDReconstruction.py \
   --detectorModel=ILD_FCCee_v01 \
   --inputFiles="$SIM_FILE" \
@@ -73,10 +77,11 @@ k4run ILDReconstruction.py \
   --num-events=-1
 ```
 
-**NOT EXECUTED IN STAGE 4.** In reconstruction, `--num-events=-1` means
-process every event already present in the SIM; it does not request a new
-generator event count. The SIM-to-REC-only wrapper for Pythia input executes
-the same command and verifies that the SIM and REC event counts agree.
+This command performs real reconstruction and writes a REC. In reconstruction,
+`--num-events=-1` means process every event already present in the SIM; it does
+not request a new generator event count. The SIM-to-REC-only wrapper for Pythia
+input executes the same command and verifies that the SIM and REC event counts
+agree.
 
 ## Validation after each stage
 
@@ -86,6 +91,7 @@ WHAT: confirm a non-empty, readable EDM4hep file with the requested number of
 events.
 
 ```bash
+export SIM_FILE=/path/to/output_SIM.edm4hep.root
 test -s "$SIM_FILE"
 podio-dump -e 0 "$SIM_FILE"
 ```
@@ -99,6 +105,7 @@ collection in the workflow.
 ### REC
 
 ```bash
+export REC_FILE=/path/to/output_REC.edm4hep.root
 test -s "$REC_FILE"
 podio-dump -e 0 "$REC_FILE"
 ```
@@ -109,6 +116,8 @@ simulated-hit and tracker-hit relation collections declared in
 `scripts/workflow/run_truthlink_linker_v1.py`. For a campaign inventory:
 
 ```bash
+export DATA_ROOT=/path/to/stdhep
+export OUTPUT_ROOT=/path/to/campaign/outputs
 scripts/validation/validate_outputs.sh "$DATA_ROOT" "$OUTPUT_ROOT"
 ```
 
