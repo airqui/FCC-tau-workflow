@@ -22,13 +22,17 @@ Choose a dependency directory outside the clone:
 export FCC_TAU_DEPENDENCY_ROOT="$PWD/../fcc-tau-dependencies"
 scripts/workflow/bootstrap_ildconfig.sh
 source scripts/workflow/env.sh
-python -m pip install -e .
+python -m venv --system-site-packages "$FCC_TAU_DEPENDENCY_ROOT/venv"
+source "$FCC_TAU_DEPENDENCY_ROOT/venv/bin/activate"
+python -m pip install --no-build-isolation -e .
 ```
 
 `env.sh` checks the ILDConfig commit and geometry hash. At IFIC its default is
 the frozen Key4hep `2026-08-21` CVMFS setup. At another site, set
 `KEY4HEP_SETUP` and `COMPACT_FILE` explicitly; that is an override, not a claim
-that another stack has been validated.
+that another stack has been validated. The virtual environment inherits the
+read-only Key4hep packages while keeping the editable installation in the
+external dependency directory.
 
 ## 3. Inspect the frozen configuration
 

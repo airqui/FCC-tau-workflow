@@ -49,10 +49,14 @@ those products. There are no Python imports or absolute paths between clones.
 ## Dependencies and validation
 
 Key4hep supplies ROOT, podio, EDM4hep, `ddsim`, `k4run`, and the ILD stack; pip
-does not install them. Install only this Python package with:
+does not install them. The Key4hep Python prefix is read-only, so create the
+documented external virtual environment after sourcing the stack, then install
+only this package:
 
 ```bash
-python -m pip install -e .
+python -m venv --system-site-packages "$FCC_TAU_DEPENDENCY_ROOT/venv"
+source "$FCC_TAU_DEPENDENCY_ROOT/venv/bin/activate"
+python -m pip install --no-build-isolation -e .
 ```
 
 For repository-only validation that does not run production:

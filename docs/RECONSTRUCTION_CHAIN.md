@@ -37,8 +37,10 @@ python scripts/validation/validate_contracts.py
 ```
 
 Key4hep, ROOT, podio, EDM4hep, DD4hep, `ddsim`, `k4run`, and the ILD software
-stack are external dependencies. `python -m pip install -e .` installs the
-workflow package only; pip cannot install the validated Key4hep stack.
+stack are external dependencies. The editable package is installed in the
+`--system-site-packages` virtual environment shown in the quick start; pip
+cannot install the validated Key4hep stack, and the CVMFS Python prefix is
+read-only.
 
 ## STDHEP to SIM
 
