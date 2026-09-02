@@ -92,7 +92,7 @@ manual review. It refuses to overwrite the manifest.
 ## Condor usage
 
 Templates are in `condor/templates/`; repository-relative executables are in
-`condor/wrappers/`. Templates receive `repo_root`, `log_dir`, and `manifest`
+`condor/wrappers/`. Templates receive `repo_root`, `log_dir`, and `queue_file`
 as submit macros. Manifests must match the `queue ... from` columns in the
 chosen template, output directories must exist, and shared paths must be
 visible on worker nodes because `should_transfer_files = NO`.
