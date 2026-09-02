@@ -1,0 +1,17 @@
+version: truthlink_ancestor_assignment_v1
+direct_assignment_source: truthlink_assignment_v1
+direct_assignment_is_immutable: true
+selected_truth_definition:
+  generator_status: 1
+  excluded_abs_pdg: [12, 14, 16]
+  minimum_momentum: 1.0e-10
+ancestor_rule:
+  direction: parents
+  selection: nearest_depth
+  unique_required: true
+  equal_depth_multiple_selected: ambiguous
+  shallower_selected_wins: true
+  cycles: fatal
+topology:
+  SIMPLE: nTracks <= 1 and nClusters <= 1
+  COMPLEX: nTracks >= 2 or nClusters >= 2

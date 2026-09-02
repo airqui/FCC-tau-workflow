@@ -1,0 +1,16 @@
+# Supply repo_root, log_dir and queue_file with condor_submit -append.
+universe = vanilla
+executable = $(repo_root)/condor/wrappers/run_truthlink_assignment_job.sh
+arguments = $(source_id) $(input_rec) $(assignment_output) $(candidate_output) $(summary_output) $(retained_linked_rec) $(expected_events)
+environment = "OMP_NUM_THREADS=1 OMP_THREAD_LIMIT=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 ROOT_MAX_THREADS=1 PYTHON_CPU_COUNT=1 TBB_NUM_THREADS=1"
+initialdir = $(repo_root)
+output = $(log_dir)/events_$(source_id).$(ClusterId).$(ProcId).out
+error  = $(log_dir)/events_$(source_id).$(ClusterId).$(ProcId).err
+log    = $(log_dir)/truthlink_assignment_v1.$(ClusterId).log
+should_transfer_files = NO
+request_cpus   = 1
+request_memory = 3 GB
+request_disk   = 4 GB
++JobFlavour = "tomorrow"
++JobBatchName = "fcc-truthlink-assignment-v1"
+queue source_id,input_rec,assignment_output,candidate_output,summary_output,retained_linked_rec,expected_events from $(queue_file)

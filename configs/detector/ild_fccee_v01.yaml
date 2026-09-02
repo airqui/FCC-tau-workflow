@@ -1,0 +1,15 @@
+version: 1
+detector_model: ILD_FCCee_v01
+compact_from_key4hep: FCCee/ILD_FCCee/compact/ILD_FCCee_v01/ILD_FCCee_v01.xml
+compact_sha256: ab48a78ef69f6ee417233e34cffa75a0fd41742fb02130c57303f402abd87e29
+simulation:
+  steering_from_ildconfig: StandardConfig/production/ddsim_steer.py
+  crossing_angle_boost_rad: 0.015
+  physics_list: QGSP_BERT
+  range_cut_mm: 0.1
+  minimum_kinetic_energy_MeV: 1
+  geant4_decays: false
+  saved_processes: [Decay]
+reconstruction:
+  steering_from_ildconfig: StandardConfig/production/ILDReconstruction.py
+  num_events: -1

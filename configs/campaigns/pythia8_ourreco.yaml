@@ -1,0 +1,13 @@
+version: 1
+campaign: PYTHIA8_ourReco
+mode: SIM_to_REC_only
+input_files: 18
+events_per_input: 1000
+runtime_configuration:
+  sim_root_environment: FCC_TAU_PYTHIA_SIM_ROOT
+  reconstruction_root_environment: FCC_TAU_PYTHIA_RECO_ROOT
+resources:
+  request_cpus: 1
+  request_memory_GB: 4
+  request_disk_GB: 4
+  threading: 1

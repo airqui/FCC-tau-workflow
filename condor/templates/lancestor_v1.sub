@@ -1,0 +1,15 @@
+# Supply repo_root, log_dir and queue_file with condor_submit -append.
+universe = vanilla
+executable = $(repo_root)/condor/wrappers/run_lancestor_job.sh
+arguments = $(sample) $(source_file_id) $(input_rec) $(assignment_output) $(ancestor_output) $(ancestor_summary) $(expected_events)
+initialdir = $(repo_root)
+should_transfer_files = NO
+output = $(log_dir)/$(sample)_$(source_file_id).$(ClusterId).$(ProcId).out
+error = $(log_dir)/$(sample)_$(source_file_id).$(ClusterId).$(ProcId).err
+log = $(log_dir)/lancestor_v1.$(ClusterId).log
+request_cpus = 1
+request_memory = 3 GB
+request_disk = 2 GB
++JobFlavour = "tomorrow"
++JobBatchName = "fcc-Lancestor-v1"
+queue sample,source_file_id,input_rec,assignment_output,ancestor_output,ancestor_summary,expected_events from $(queue_file)

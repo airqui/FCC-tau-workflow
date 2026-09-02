@@ -1,0 +1,17 @@
+version: truthlink_linker_collections_v1
+input_mode: REC_only
+processor: RecoMCTruthLinker
+full_reco_relation: true
+writer: keep_all
+collections:
+  edm_mc_collection: MCParticles
+  processor_mc_parameter: MCParticle
+  naming_note: The Marlin processor parameter uses MCParticle while podio exposes the EDM collection as MCParticles.
+  pfo: PandoraPFOs
+  tracks: MarlinTrkTracks
+  clusters: PandoraClusters
+outputs:
+  reco_mc_relation: RecoMCTruthLinkTruthlinkV1
+  mc_reco_relation: MCTruthRecoLinkTruthlinkV1
+  track_mc_relation: MarlinTrkTracksMCTruthLinkTruthlinkV1
+  cluster_mc_relation: ClusterMCTruthLinkTruthlinkV1

@@ -1,0 +1,15 @@
+# Supply repo_root, log_dir and queue_file with condor_submit -append.
+universe = vanilla
+executable = $(repo_root)/condor/wrappers/run_pythia_truthlink_assignment_job.sh
+arguments = $(source_file_id) $(input_rec) $(assignment_output) $(candidate_output) $(summary_output) $(retained_linked_rec) $(expected_events)
+initialdir = $(repo_root)
+should_transfer_files = NO
+output = $(log_dir)/$(sample)_suffix$(suffix).out
+error = $(log_dir)/$(sample)_suffix$(suffix).err
+log = $(log_dir)/cluster.log
+request_cpus = 1
+request_memory = 3 GB
+request_disk = 4 GB
++JobFlavour = "tomorrow"
++JobBatchName = "fcc-pythia-truthlink-assignment-v1"
+queue sample,suffix,source_file_id,input_rec,assignment_output,candidate_output,summary_output,retained_linked_rec,expected_events from $(queue_file)

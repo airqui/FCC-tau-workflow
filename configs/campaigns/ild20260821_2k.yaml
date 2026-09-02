@@ -1,0 +1,19 @@
+version: 1
+campaign: ILD20260821_2k
+status: validated
+events_per_input: 2000
+input_files_available: 996
+expected_total_events: 1992000
+historical_inventory: 997
+missing_input: events_090620005.stdhep.gz
+site_reference:
+  data_root: /lustre/ific.uv.es/prj/gl/abehep.flc/FCC/generation/stdhep/winter2023/wzp6_ee_tautau_ecm91p2
+  production_root: /lustre/ific.uv.es/prj/gl/abehep.flc/FCC/ILD20260821_2k
+runtime_configuration:
+  data_root_environment: FCC_TAU_DATA
+  production_root_environment: FCC_TAU_PRODUCTION
+resources:
+  request_cpus: 5
+  request_memory_GB: 6
+  request_disk_GB: 10
+  threading: 1

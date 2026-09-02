@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fcc-tau-workflow"
+version = "0.1.0"
+description = "FCC-ee tau production, reconstruction and truth-association workflow"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+products = ["pyarrow"]
+test = ["pytest", "PyYAML"]
+
+[tool.setuptools.package-data]
+fcc_tau_workflow = ["contracts/*.yaml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests/unit"]

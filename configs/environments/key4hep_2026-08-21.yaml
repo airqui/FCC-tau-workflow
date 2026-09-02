@@ -1,0 +1,15 @@
+version: 1
+status: validated
+key4hep:
+  release: "2026-08-21"
+  ific_setup_reference: /cvmfs/sw-nightlies.hsf.org/key4hep/releases/2026-08-21/x86_64-almalinux9-gcc14.2.0-opt/key4hep-stack/2026-08-21-5qmpe6/setup.sh
+  override_environment_variable: KEY4HEP_SETUP
+external_software:
+  ildconfig_commit: 279b180a88597e45dfaf84f35d1b8b5358300079
+  marlinreco_linker_commit: fe8e9e2d08b47048e639c072b7bce97f9847f7d1
+detector:
+  model: ILD_FCCee_v01
+  compact_sha256: ab48a78ef69f6ee417233e34cffa75a0fd41742fb02130c57303f402abd87e29
+notes:
+  - Only the IFIC reference environment above has been validated.
+  - Overrides make site placement explicit; they do not claim validation of another stack.

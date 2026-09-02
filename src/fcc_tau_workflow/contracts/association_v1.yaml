@@ -1,0 +1,24 @@
+contract: fcc_tau_association_v1
+status: frozen
+authoritative_event_identity:
+  fields: [sample, source_file_id, event_in_file]
+  note: Packed or Cantor event IDs are derived conveniences and are not cross-repository keys.
+pfo_identity:
+  fields: [sample, source_file_id, event_in_file, pfo_index]
+truth_identity:
+  fields: [sample, source_file_id, event_in_file, mc_index]
+direct_assignment:
+  version: truthlink_assignment_v1
+  relation_collection: RecoMCTruthLinkTruthlinkV1
+  status_field: truthlink_status
+  statuses: [assigned, truthlink_orphan_no_relation, truthlink_orphan_ambiguous]
+ancestor_assignment:
+  version: truthlink_ancestor_assignment_v1
+  status_field: ancestor_status
+  statuses: [direct_unassigned, same_direct_selected, promoted_unique_ancestor, ancestor_orphan_ambiguous, ancestor_no_selected_ancestor]
+provenance_required:
+  - source_rec
+  - source_file_id
+  - event_count
+  - assignment_version
+  - input_checksum_or_manifest_reference

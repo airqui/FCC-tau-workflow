@@ -1,0 +1,15 @@
+# Supply repo_root, log_dir and queue_file with condor_submit -append.
+universe = vanilla
+executable = $(repo_root)/condor/wrappers/run_tautau_job.sh
+arguments = $(input_file) $(ClusterId).$(Process) 2000
+environment = "OMP_NUM_THREADS=1 OMP_THREAD_LIMIT=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 ROOT_MAX_THREADS=1 PYTHON_CPU_COUNT=1 TBB_NUM_THREADS=1"
+output = $(log_dir)/tautau_2k.$(ClusterId).$(Process).out
+error  = $(log_dir)/tautau_2k.$(ClusterId).$(Process).err
+log    = $(log_dir)/tautau_2k.$(ClusterId).log
+should_transfer_files = NO
+request_cpus   = 5
+request_memory = 6 GB
+request_disk   = 10 GB
++JobFlavour = "tomorrow"
++JobBatchName = "fcc-tautau-ild-20260821-2k"
+queue input_file from $(queue_file)

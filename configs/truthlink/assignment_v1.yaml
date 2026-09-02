@@ -1,0 +1,66 @@
+version: truthlink_assignment_v1
+date: 2026-08-25
+scope:
+  generator: WHIZARD_3.0.3
+  process: ee_to_tautau
+  sqrt_s_GeV: 91.2
+  files: 996
+  events_per_file: 2000
+  total_events: 1992000
+software:
+  key4hep_release: "2026-08-21"
+  detector_model: ILD_FCCee_v01
+  ildconfig_commit: 279b180a88597e45dfaf84f35d1b8b5358300079
+  marlinreco_commit: fe8e9e2d08b47048e639c072b7bce97f9847f7d1
+linker:
+  processor: RecoMCTruthLinker
+  full_reco_relation: true
+  input_mode: REC_only
+  pfo_collection: PandoraPFOs
+  mc_collection: MCParticles
+  output_relation: RecoMCTruthLinkTruthlinkV1
+packed_weight:
+  formula: W = 10000 * clusterPermille + trackPermille
+  track_permille: int(W) % 10000
+  cluster_permille: int(W) // 10000
+  track_component: trackPermille / 1000
+  cluster_component: clusterPermille / 1000
+  comparison: exact_integer_permille
+  tolerance: null
+  packed_zero_is_relation: true
+assignment:
+  pfo_scope: every_PandoraPFO_independently
+  track_branch:
+    condition: any_candidate_track_permille_gt_0
+    primary: maximum_track_permille
+    tie_break: maximum_cluster_permille_among_max_track_candidates
+    unresolved: truthlink_orphan_ambiguous
+  cluster_branch:
+    condition: no_candidate_track_permille_gt_0
+    primary: maximum_cluster_permille
+    tie_break: unique_neutral_candidate_among_exact_max_cluster_ties
+    unresolved: truthlink_orphan_ambiguous
+  no_relation: truthlink_orphan_no_relation
+  neutral_definition: stored_MCParticle_charge_exactly_0.0
+  forbidden_tiebreakers:
+    - MC_index
+    - collection_order
+    - PDG
+    - floating_point_tolerance
+status_values:
+  - assigned
+  - truthlink_orphan_no_relation
+  - truthlink_orphan_ambiguous
+event_identity:
+  primary_key: [source_file_id, event_in_file, pfo_index]
+  event_id_formula: int(source_file_id) * 10000 + event_in_file
+outputs:
+  assignment_format: parquet_zstd
+  candidate_format: parquet_zstd
+  one_assignment_row_per_pfo: true
+  candidate_scope: all_full_relation_candidates
+resources_from_pilot:
+  request_cpus: 1
+  request_memory_GB: 3
+  request_disk_GB: 4
+  threading: 1
