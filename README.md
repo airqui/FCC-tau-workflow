@@ -63,7 +63,7 @@ For repository-only validation that does not run production:
 
 ```bash
 python scripts/validation/validate_contracts.py
-pytest -q tests/unit
+python -m pytest -q tests/unit
 (cd "$(git rev-parse --show-toplevel)" && \
   sha256sum --check configs/truthlink/code_checksums.sha256)
 ```
