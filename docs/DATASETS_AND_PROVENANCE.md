@@ -49,6 +49,16 @@ clone. Do not commit ROOT/EDM4hep, large Parquet, logs, or generated plot trees.
 All generic commands take paths through arguments or environment variables.
 No personal historical path is a runtime requirement.
 
+Canonical REC files and explicitly retained truth-linked REC files may coexist
+in managed storage. A filename or campaign directory alone does not prove that
+`RecoMCTruthLinkTruthlinkV1` is present and populated. Inspect the actual file
+before deciding whether it can be consumed as an already linked product; the
+maintained Mode-A wrapper otherwise creates a temporary linked REC and retains
+it only when a non-existing destination is supplied explicitly.
+
+A dated, read-only IFIC inventory is preserved in
+[`docs/audits/truthlink_storage_inventory.md`](audits/truthlink_storage_inventory.md).
+
 ## IFIC example
 
 The validated IFIC Key4hep setup is recorded in

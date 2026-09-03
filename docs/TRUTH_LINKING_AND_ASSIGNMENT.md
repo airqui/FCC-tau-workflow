@@ -27,6 +27,15 @@ interchangeable definitions of truth.
 contributor and its packed track/cluster weight. L_direct makes the later,
 explicit reduction.
 
+`TruthlinkV1` is the maintained suffix used to keep these output collections
+separate from pre-existing relation names. It is a collection-naming and
+provenance convention, not a different `RecoMCTruthLinker` algorithm. The
+configured flow is:
+
+```text
+RecoMCTruthLinker -> candidate relation collections -> RecoMCTruthLinkTruthlinkV1 -> L_direct -> L_ancestor
+```
+
 ## 3. Running the REC-only linker
 
 Two truth-link production modes are defined:
@@ -99,11 +108,17 @@ The validated configuration is `configs/truthlink/linker_collections_v1.yaml`:
 | EDM MC collection | `MCParticles` |
 | Processor MC parameter | `MCParticle` |
 | PFO-to-MC output | `RecoMCTruthLinkTruthlinkV1` |
+| MC-to-PFO output | `MCTruthRecoLinkTruthlinkV1` |
+| Track-to-MC output | `MarlinTrkTracksMCTruthLinkTruthlinkV1` |
+| Cluster-to-MC output | `ClusterMCTruthLinkTruthlinkV1` |
 
 `MCParticle` is the Marlin processor parameter value; `MCParticles` is the EDM
 collection exposed by podio. The singular/plural distinction is intentional,
 not a typo. The steering also names the required tracker-hit and calorimeter-hit
-relation inputs and keeps every pre-existing collection in the output REC.
+relation inputs, writes the configured reverse and hit-level relation names,
+and keeps every pre-existing collection in the output REC. The L_direct
+extractor consumes `RecoMCTruthLinkTruthlinkV1`; the other collections remain
+persisted supporting relations and are not alternate L_direct inputs.
 
 ## 5. FullRecoRelation
 
