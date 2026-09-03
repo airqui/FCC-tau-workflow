@@ -89,6 +89,10 @@ Representative real Parquet paths include:
 - `/lustre/ific.uv.es/prj/gl/abehep.flc/FCC/samples_pythia_20260821/truthlink_assignment_v1_ourReco/P8O_suffix1_candidate_relations.parquet`
 - `/lustre/ific.uv.es/prj/gl/abehep.flc/FCC/samples_pythia_20260821/truthlink_assignment_ancestor_v1_ourReco/P8O_suffix1_ancestor_assignment.parquet`
 
+The last path preserves historical on-disk naming and must not be interpreted
+as the canonical assignment identifier, which is
+`truthlink_ancestor_assignment_v1`.
+
 ## EDM4HEP COLLECTION AUDIT
 
 ### Canonical W REC

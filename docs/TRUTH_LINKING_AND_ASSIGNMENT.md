@@ -33,7 +33,14 @@ provenance convention, not a different `RecoMCTruthLinker` algorithm. The
 configured flow is:
 
 ```text
-RecoMCTruthLinker -> candidate relation collections -> RecoMCTruthLinkTruthlinkV1 -> L_direct -> L_ancestor
+RecoMCTruthLinker
+  -> TruthlinkV1 candidate relation collections
+     - RecoMCTruthLinkTruthlinkV1 [PFO -> MC; consumed by L_direct]
+     - MCTruthRecoLinkTruthlinkV1 [MC -> PFO; persisted supporting relation]
+     - MarlinTrkTracksMCTruthLinkTruthlinkV1 [persisted supporting relation]
+     - ClusterMCTruthLinkTruthlinkV1 [persisted supporting relation]
+  -> L_direct
+  -> L_ancestor
 ```
 
 ## 3. Running the REC-only linker
