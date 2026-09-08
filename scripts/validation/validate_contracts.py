@@ -8,6 +8,7 @@ from pathlib import Path
 import yaml
 
 from fcc_tau_workflow.product_manifest import load_product_manifest
+from fcc_tau_workflow.truthlinked_preflight import REQUIRED_COLLECTIONS
 
 
 def load(path: Path):
@@ -26,6 +27,7 @@ def main() -> None:
     linker = load(repo / "configs/truthlink/linker_collections_v1.yaml")
     detector = load(repo / "configs/detector/ild_fccee_v01.yaml")
     environment = load(repo / "configs/environments/key4hep_2026-08-21.yaml")
+    kkmcee = load(repo / "configs/campaigns/kkmcee_2k.yaml")
     contract = load(repo / "src/fcc_tau_workflow/contracts/association_v1.yaml")
     assert assignment["packed_weight"]["formula"] == "W = 10000 * clusterPermille + trackPermille"
     assert assignment["assignment"]["track_branch"]["condition"] == "any_candidate_track_permille_gt_0"
@@ -38,6 +40,12 @@ def main() -> None:
     assert detector["simulation"]["physics_list"] == "QGSP_BERT"
     assert detector["reconstruction"]["num_events"] == -1
     assert environment["external_software"]["ildconfig_commit"] == "279b180a88597e45dfaf84f35d1b8b5358300079"
+    assert kkmcee["generator"]["events"] == 2000
+    assert kkmcee["generator"]["comparison_weight_policy"] == "unweighted"
+    assert kkmcee["simulation"]["detector"] == detector["detector_model"]
+    assert kkmcee["simulation"]["crossing_angle_boost_rad"] == detector["simulation"]["crossing_angle_boost_rad"]
+    assert kkmcee["truthlink"]["full_reco_relation"] is True
+    assert kkmcee["truthlink"]["required_collections"] == list(REQUIRED_COLLECTIONS)
     assert contract["authoritative_event_identity"]["fields"] == ["sample", "source_file_id", "event_in_file"]
     if args.product_manifest:
         product = load_product_manifest(args.product_manifest, check_products=True)

@@ -1,0 +1,39 @@
+version: 1
+campaign: KKMCee_ILD20260908_2k
+status: awaiting_final_truthlinked_rec
+generator:
+  name: KKMCee
+  input_format: HepMC3
+  input: /lustre/ific.uv.es/prj/gl/abehep.flc/FCC/KKMCee/kk_ee_Ztautau_4991.hepmc
+  events: 2000
+  sqrt_s_GeV: 91.188
+  event_weights_present: [Weight, CEEX0, CEEX1, CEEX2]
+  comparison_weight_policy: unweighted
+simulation:
+  detector: ILD_FCCee_v01
+  key4hep_release: 2026-08-21
+  crossing_angle_boost_rad: 0.015
+  ddsim_steering: ${FCC_TAU_DEPENDENCIES}/ILDConfig/StandardConfig/production/ddsim_steer.py
+  ddsim_steering_sha256: fdaa1a29fcf9ac704e18df5c69e7813abf7389b4a082991c337615778bce4cfd
+reconstruction:
+  command: k4run ILDReconstruction.py
+  detector_model: ILD_FCCee_v01
+  num_events: -1
+truthlink:
+  mode: REC_only
+  full_reco_relation: true
+  linked_rec: /lustre/ific.uv.es/prj/gl/abehep.flc/FCC/KKMCee/ILD20260908_2k/truthlink/kk_ee_Ztautau_4991_REC_TruthlinkV1.edm4hep.root
+  test10_linked_rec: /lustre/ific.uv.es/prj/gl/abehep.flc/FCC/KKMCee/ILD20260908_2k/truthlink/kk_ee_Ztautau_4991_test10_REC_TruthlinkV1.edm4hep.root
+  required_collections:
+    - MCParticles
+    - PandoraPFOs
+    - RecoMCTruthLinkTruthlinkV1
+    - MCTruthRecoLinkTruthlinkV1
+    - MarlinTrkTracksMCTruthLinkTruthlinkV1
+    - ClusterMCTruthLinkTruthlinkV1
+analysis_identity:
+  sample: KKMCee
+  source_file_id: "700000001"
+  truth_definition: selected_truth_v1
+  direct_assignment: truthlink_assignment_v1
+  ancestor_assignment: truthlink_ancestor_assignment_v1

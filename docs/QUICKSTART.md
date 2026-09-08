@@ -210,3 +210,34 @@ run simulation, reconstruction, Condor, or analysis.
 
 The fixture manifest contains site-specific read-only Lustre paths and is
 therefore an IFIC regression fixture, not a portable production input.
+
+## 11. Consume a completed externally produced TruthlinkV1 REC
+
+For the KKMCee 2k campaign, first run the all-event stability/collection
+preflight documented in [Datasets and provenance](DATASETS_AND_PROVENANCE.md).
+Only after it passes, create new local output directories and invoke the
+generic maintained extractors; no linker rerun is needed:
+
+```bash
+export LINKED_REC=/path/to/completed_2k_REC_TruthlinkV1.edm4hep.root
+export PRODUCTS=/path/to/new/kkmcee_material/derived
+mkdir -p "$PRODUCTS"
+python scripts/workflow/extract_truthlink_assignments.py \
+  --linked-rec "$LINKED_REC" --source-rec "$LINKED_REC" \
+  --source-file-id 700000001 --expected-events 2000 \
+  --assignment-output "$PRODUCTS/KKMCee_2k_pfo_assignment.parquet" \
+  --candidate-output "$PRODUCTS/KKMCee_2k_candidate_relations.parquet" \
+  --summary-output "$PRODUCTS/KKMCee_2k_direct_summary.json"
+python scripts/workflow/extract_lancestor_assignments.py \
+  --sample KKMCee --source-file-id 700000001 \
+  --source-rec "$LINKED_REC" \
+  --direct-assignment "$PRODUCTS/KKMCee_2k_pfo_assignment.parquet" \
+  --ancestor-output "$PRODUCTS/KKMCee_2k_ancestor_assignment.parquet" \
+  --summary-output "$PRODUCTS/KKMCee_2k_ancestor_summary.json" \
+  --expected-events 2000
+```
+
+These commands perform L_direct reduction and L_ancestor promotion with the
+frozen implementations. They refuse existing outputs. The two repositories
+remain data-coupled only: transfer the resulting manifest/paths to TausFCCee;
+do not import code between clones.

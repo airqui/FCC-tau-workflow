@@ -5,9 +5,30 @@
 - **W:** WHIZARD generation plus our validated ILD reconstruction.
 - **P8C:** PYTHIA8 generation plus collaborator reconstruction.
 - **P8O:** PYTHIA8 generation plus our validated ILD reconstruction.
+- **KKMCee:** KKMCee generation plus our validated ILD reconstruction. The
+  maintained expected 2k campaign provenance is in
+  `configs/campaigns/kkmcee_2k.yaml`; its comparison policy is unweighted.
 
 The names identify both generator and reconstruction provenance. Do not merge
 P8C and P8O merely because their generator is the same.
+
+The KKMCee campaign uses HepMC3 input at 91.188 GeV, whereas W uses WHIZARD
+3.0.3 at 91.2 GeV. This 12 MeV nominal-energy difference is retained in
+provenance. The successful ten-event KKMCee chain is an interface fixture only
+and must never supply final scientific numbers.
+
+Before consuming the final KKMCee linked REC, require a stable, non-empty file
+and inspect all 2,000 events and all configured TruthlinkV1 collections:
+
+```bash
+python scripts/validation/preflight_truthlinked_rec.py \
+  --input /lustre/ific.uv.es/prj/gl/abehep.flc/FCC/KKMCee/ILD20260908_2k/truthlink/kk_ee_Ztautau_4991_REC_TruthlinkV1.edm4hep.root \
+  --expected-events 2000 --minimum-age-seconds 300 --checksum
+```
+
+The preflight verifies that the file is unchanged while read and that every
+required collection exists in every event and is populated somewhere in the
+file. Failure is fatal; downstream products must not be created.
 
 ## Validated W inventory
 
