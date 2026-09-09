@@ -34,7 +34,7 @@ ASSIGNMENT_SCHEMA = pa.schema([
     ("event_in_file", pa.int32()),
     ("event_id", pa.int64()),
     ("event_header_run", pa.uint32()),
-    ("event_header_event", pa.int32()),
+    ("event_header_event", pa.uint32()),
     ("pfo_index", pa.int32()),
     ("pfo_type", pa.int32()),
     ("pfo_charge", pa.float64()),
