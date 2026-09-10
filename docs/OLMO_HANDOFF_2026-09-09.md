@@ -1,6 +1,7 @@
 # OLMO_HANDOFF
 
-**Date:** 2026-09-09
+**Created:** 2026-09-09  
+**Last updated:** 2026-09-10
 
 This document is the entry point for reproducing the FCC-ee tau simulation,
 reconstruction, truth association and analysis workflow used in the current
@@ -10,11 +11,13 @@ The workflow is split between two repositories:
 
 ```text
 FCC-tau-workflow
+
     simulation / reconstruction / TruthLinkV1
     L_direct / L_ancestor
     production provenance and validation
 
 TausFCCee
+
     analysis
     G association
     MC comparisons
@@ -44,7 +47,7 @@ The main rule is:
 # 1. Software and detector provenance
 
 The recommended software baseline for new FCC-tau work is Key4hep stable
-2026-04-08.  Source the exact validated stack with:
+2026-04-08. Source the exact validated stack with:
 
 ```bash
 source /cvmfs/sw.hsf.org/key4hep/releases/2026-04-08/x86_64-almalinux9-gcc14.2.0-opt/key4hep-stack/2026-04-08-i6h4f2/setup.sh
@@ -117,11 +120,12 @@ library:
 libMarlinReco.so
 ```
 
-The exact nightly CVMFS stack is no longer available.  It remains the
+The exact nightly CVMFS stack is no longer available. It remains the
 provenance of the old results because it was the environment used to produce
 them, not because the study identified a nightly-only reconstruction feature.
+
 New work should use stable 2026-04-08 unless a study explicitly requires and
-validates another release.  Do not rewrite the provenance of old results.
+validates another release. Do not rewrite the provenance of old results.
 
 ---
 
@@ -227,6 +231,16 @@ Marlin processors
 
 The processors themselves are still standard Marlin processors.
 
+For stable Key4hep 2026-04-08 production requiring TruthLinkV1, the bare
+reconstruction command above is **not** the complete FCC-tau production chain.
+
+`RecoMCTruthLinker` must be inserted into the same reconstruction process,
+after Pandora/PFO production and before the final REC writer, as described in
+Section 6.
+
+Do not produce a stable REC first and then reopen it in a second
+`k4MarlinWrapper` pass merely to add TruthLinkV1.
+
 ---
 
 # 4. Tracking used by Pandora
@@ -288,17 +302,23 @@ Thus:
 # 6. Stable reconstruction with integrated TruthLinkV1
 
 On stable Key4hep 2026-04-08, do not run TruthLinkV1 as a second-pass Marlin
-job.  A standalone pass fails before linking while converting the previously
+job.
+
+A standalone pass fails before linking while converting the previously
 written REC from EDM4hep to LCIO:
 
 ```text
-REC -> k4MarlinWrapper -> EDM4hep-to-LCIO conversion -> failure
+REC
+ -> k4MarlinWrapper
+ -> EDM4hep-to-LCIO conversion
+ -> failure
 ```
 
 This was reproduced with a harmless one-event `Statusmonitor` pass containing
-neither `RecoMCTruthLinker` nor an output writer.  It is therefore a stable
-release I/O/conversion workflow constraint, not evidence of a
-`RecoMCTruthLinker` physics or algorithm problem.
+neither `RecoMCTruthLinker` nor an output writer.
+
+It is therefore a stable-release I/O/conversion workflow constraint, not
+evidence of a `RecoMCTruthLinker` physics or algorithm problem.
 
 The validated stable workflow is:
 
@@ -318,9 +338,9 @@ Important configuration:
 
 ```text
 RecoParticleCollection = PandoraPFOs
-TrackCollection        = MarlinTrkTracks
-ClusterCollection      = PandoraClusters
-FullRecoRelation       = true
+TrackCollection         = MarlinTrkTracks
+ClusterCollection       = PandoraClusters
+FullRecoRelation        = true
 ```
 
 The processor writes the FCC-tau-namespaced collections:
@@ -341,17 +361,22 @@ ClusterMCTruthLinkTruthlinkV1
 
 Use the standard unmodified `RecoMCTruthLinker` configuration above inside the
 reconstruction process, after Pandora PFO production and before final REC
-writing.  Do not strip ParticleID collections or alter Pandora as a workaround,
-and do not reopen the stable REC in a second-pass Marlin job.
+writing.
 
-The integrated workflow was repeated on the same ten P8O SIM events.  Event 2
-had 20 versus 18 `MarlinTrkTracks`; no interpretation is assigned to that
-low-level difference.  The analysis-level products were identical:
+Do not strip ParticleID collections or alter Pandora as a workaround, and do
+not reopen the stable REC in a second-pass Marlin job.
 
-- PandoraPFO multiplicities and total (86 versus 86);
-- PFO type/PDG, momentum, energy, and charge;
-- all 86 L_direct assignments;
-- all 86 L_ancestor assignments.
+The integrated workflow was repeated on the same ten P8O SIM events.
+
+Event 2 had 20 versus 18 `MarlinTrkTracks`; no interpretation is assigned to
+that low-level difference.
+
+The analysis-level products were identical:
+
+- PandoraPFO multiplicities and total: 86 versus 86;
+- PFO type/PDG, momentum, energy and charge;
+- all 86 `L_direct` assignments;
+- all 86 `L_ancestor` assignments.
 
 Conclusion: **ANALYSIS-LEVEL REPRODUCIBLE**.
 
@@ -364,8 +389,10 @@ The controlled campaign is stored under:
 ```
 
 P8O starts from historical existing SIM; P8H starts from PYTHIA 20260909
-HepMC and stable simulation.  Both then use stable reconstruction with
-integrated TruthLinkV1 and the same L_direct and L_ancestor definitions.
+HepMC and stable simulation.
+
+Both then use stable reconstruction with integrated TruthLinkV1 and the same
+`L_direct` and `L_ancestor` definitions.
 
 | Quantity | P8O | P8H |
 |---|---:|---:|
@@ -380,15 +407,19 @@ integrated TruthLinkV1 and the same L_direct and L_ancestor definitions.
 | Direct unassigned | 3 | 3 |
 
 The raw MC bookkeeping differs substantially, but the maintained
-analysis-truth populations are very similar.  Analysis-truth photons number
-53,718 for P8O and 53,988 for P8H; neither sample has parentless
-analysis-truth photons.  Raw L_direct unique assignment is approximately
-99.995% in both samples.  This raw PFO-to-any-MC success must not be confused
-with truth-species association efficiency.
+analysis-truth populations are very similar.
+
+Analysis-truth photons number 53,718 for P8O and 53,988 for P8H; neither
+sample has parentless analysis-truth photons.
+
+Raw `L_direct` unique assignment is approximately 99.995% in both samples.
+
+This raw PFO-to-any-MC success must not be confused with truth-species
+association efficiency.
 
 ## 7.2 Photon residual headline
 
-For L_ancestor-associated photons:
+For `L_ancestor`-associated photons:
 
 | Sample | N | p median | p h68 | theta median [mrad] | theta h68 [mrad] |
 |---|---:|---:|---:|---:|---:|
@@ -396,13 +427,17 @@ For L_ancestor-associated photons:
 | P8O stable | 22,496 | -0.01104 | 0.13909 | 0.3293 | 12.2486 |
 | P8H stable | 22,904 | -0.01027 | 0.14164 | 0.1767 | 12.1975 |
 
-The broad photon theta component is robust.  Neither P8O-to-P8H nor
-stable-to-historical-nightly changes its width materially, and the raw
-generator-bookkeeping difference does not propagate into a materially
-different selected photon response.  This observation does not motivate a
-further generator campaign.  A future photon-specific reconstruction or
-association study may investigate the absolute approximately 12 mrad width,
-but it should not be framed as a PYTHIA or Key4hep-release regression.
+The broad photon theta component is robust.
+
+Neither P8O-to-P8H nor stable-to-historical-nightly changes its width
+materially, and the raw generator-bookkeeping difference does not propagate
+into a materially different selected photon response.
+
+This observation does not motivate a further generator campaign.
+
+A future photon-specific reconstruction or association study may investigate
+the absolute approximately 12 mrad width, but it should not be framed as a
+PYTHIA or Key4hep-release regression.
 
 Terminology remains deliberately limited by stored genealogy:
 
@@ -460,6 +495,7 @@ Authoritative implementation:
 
 ```text
 FCC-tau-workflow/
+
   src/fcc_tau_workflow/truthlink_assignment.py
   scripts/workflow/extract_truthlink_assignments.py
   configs/truthlink/assignment_v1.yaml
@@ -494,9 +530,12 @@ analysis truth particle.
 If at least one candidate has `T > 0`, then only track-supported candidates
 participate.
 
-Choose `maximum T`. If several candidates have the same maximum `T`, use
-`maximum C` among those candidates. If an exact tie still remains, mark the
-assignment ambiguous.
+Choose `maximum T`.
+
+If several candidates have the same maximum `T`, use `maximum C` among those
+candidates.
+
+If an exact tie still remains, mark the assignment ambiguous.
 
 Therefore:
 
@@ -562,13 +601,10 @@ Among other fields it stores:
 source_file_id
 event_in_file
 pfo_index
-
 truthlink_status
 assigned_mc_index
-
 track_permille
 cluster_permille
-
 decision_branch
 ```
 
@@ -594,8 +630,8 @@ requiring a particular `generatorStatus`.
 In the analysis plots, however, the quoted `L_direct` PFO coverage asks a more
 restrictive question:
 
-> Does the PFO have a unique `L_direct` assignment whose assigned MCParticle is
-> one of the analysis truth particles?
+> Does the PFO have a unique `L_direct` assignment whose assigned MCParticle
+> is one of the analysis truth particles?
 
 For the current analysis, an analysis truth particle is defined as:
 
@@ -695,14 +731,15 @@ L_direct
 
 Thus `L_ancestor` does **not** repair a missing or ambiguous direct assignment.
 
-Its purpose is different: when `L_direct` has already found a unique MCParticle
-but that particle is not a `generatorStatus == 1` analysis truth particle,
-`L_ancestor` follows the stored genealogy towards its parents.
+Its purpose is different: when `L_direct` has already found a unique
+MCParticle but that particle is not a `generatorStatus == 1` analysis truth
+particle, `L_ancestor` follows the stored genealogy towards its parents.
 
 Authoritative implementation:
 
 ```text
 FCC-tau-workflow/
+
   src/fcc_tau_workflow/truthlink_ancestor_assignment.py
   scripts/workflow/extract_lancestor_assignments.py
   configs/truthlink/ancestor_assignment_v1.yaml
@@ -718,6 +755,7 @@ The algorithm is:
 1. Start from the unique MCParticle assigned by L_direct.
 
 2. If there is no unique direct MCParticle:
+
        stop
        no ancestry search is attempted.
 
@@ -728,6 +766,7 @@ The algorithm is:
        not a neutrino
 
 4. If yes:
+
        L_ancestor = direct MCParticle
        ancestor depth = 0
        stop.
@@ -744,13 +783,16 @@ The algorithm is:
 7. Stop at the nearest depth containing such particles.
 
 8. If exactly one such particle exists at that nearest depth:
+
        L_ancestor = that particle
        mark it as a unique promoted ancestor.
 
 9. If more than one such particle exists at the same nearest depth:
+
        the ancestry result is ambiguous.
 
 10. If no such ancestor is reachable:
+
        mark the result as no_selected_ancestor
        (implementation/status name retained for provenance).
 ```
@@ -820,7 +862,7 @@ L_direct
     v
 direct MCParticle
     |
-    | if generatorStatus != 1 analysis truth,
+    | if not qualifying analysis truth,
     | traverse stored parents
     v
 L_ancestor
@@ -857,10 +899,12 @@ Therefore:
 
 ```text
 L_direct coverage
+
     = fraction of PFOs whose direct MC assignment is already
       a qualifying generatorStatus == 1 analysis truth particle
 
 L_ancestor coverage
+
     = fraction of PFOs that can be connected, directly or through
       parent traversal, to a qualifying generatorStatus == 1
       analysis truth particle
@@ -916,7 +960,9 @@ particle with:
 abs(PDG) == 15
 ```
 
-This must not be overinterpreted. In particular:
+This must not be overinterpreted.
+
+In particular:
 
 ```text
 tau-origin photon != automatically FSR
@@ -962,9 +1008,12 @@ The rule is again:
 
 ```text
 if there are track-supported candidates:
+
     max T
     then max C
+
 else:
+
     max C
 ```
 
@@ -1003,9 +1052,12 @@ sqrt(
 
 with reco-side deduplication.
 
-This is a `theta-phi` distance. It is **not** the standard eta-phi `DeltaR`.
+This is a `theta-phi` distance.
 
-`G` belongs to the analysis code in `TausFCCee`, not to the truth-link workflow.
+It is **not** the standard eta-phi `DeltaR`.
+
+`G` belongs to the analysis code in `TausFCCee`, not to the truth-link
+workflow.
 
 ---
 
@@ -1043,7 +1095,9 @@ RMS is not used as the default summary.
 PID performance is conditional on a valid unique truth/PFO association.
 
 Therefore unmatched truth and ambiguous truth/PFO associations are excluded
-from the PID denominator. They are association failures, not PID failures.
+from the PID denominator.
+
+They are association failures, not PID failures.
 
 ---
 
@@ -1081,6 +1135,7 @@ The configured analysis families are:
 
 ```text
 part12
+
     tau decay modes
     terminal tau kinematics
     analysis-truth multiplicities
@@ -1088,15 +1143,18 @@ part12
     truth-particle kinematics
 
 part3
+
     G / L_direct / L_ancestor efficiencies
     binned inefficiency
     PFO coverage
 
 part3b
+
     PFO momentum residuals
     PFO theta residuals
 
 part4
+
     conditional PID matrices
     conditional PID efficiency
 ```
@@ -1140,10 +1198,12 @@ The current maintained W/KKMCee comparison uses:
 
 ```text
 WHIZARD:
+
 source_file_id = 000242385
 2000 events
 
 KKMCee:
+
 source_file_id = 700000001
 2000 events
 ```
@@ -1182,7 +1242,7 @@ which currently contains symlinks to the canonical Lustre products.
 
 # 23. Example complete chain
 
-The conceptual chain is:
+For new FCC-tau work using stable Key4hep 2026-04-08, the conceptual chain is:
 
 ```text
 generator
@@ -1192,14 +1252,17 @@ HepMC / STDHEP
       v
 SIM
       |
-      | k4run ILDReconstruction.py
-      v
-REC
+      | k4run / Gaudi
+      |
+      | ILD reconstruction
+      |
+      | Pandora PFO production
       |
       | standard MarlinReco RecoMCTruthLinker
-      | via k4MarlinWrapper
+      | in the SAME reconstruction process
+      |
       v
-REC_TruthlinkV1
+REC + TruthLinkV1
       |
       | extract_truthlink_assignments.py
       v
@@ -1218,6 +1281,19 @@ TausFCCee analysis
       +--> PID
       +--> plots/tables
 ```
+
+In particular, for the validated stable workflow there is **no** intermediate:
+
+```text
+REC
+ -> reopen with k4MarlinWrapper
+ -> add TruthLinkV1
+```
+
+second-pass stage.
+
+The TruthLink collections must be produced before the final REC writing in the
+same reconstruction process.
 
 ---
 
@@ -1263,27 +1339,34 @@ The following definitions are frozen for the current studies:
 
 ```text
 analysis truth:
+
     generatorStatus == 1
     non-zero momentum
     non-neutrino
+
     (internal code/config name: selected_truth_v1)
 
 G
 
 truthlink_assignment_v1 = L_direct
+
 truthlink_ancestor_assignment_v1 = L_ancestor
 
 tau-origin definition
+
 representative-PFO rule
+
 PID denominator
+
 momentum residual
+
 theta residual
 ```
 
 Do not change one of these silently when comparing against existing plots.
 
-Likewise, do not interpret generator-record-dependent photon ancestry labels as
-physical ISR/FSR categories unless that interpretation has been established
+Likewise, do not interpret generator-record-dependent photon ancestry labels
+as physical ISR/FSR categories unless that interpretation has been established
 separately.
 
 ---
@@ -1310,15 +1393,24 @@ analysis configuration
 Git commits of FCC-tau-workflow and TausFCCee
 ```
 
-For the current handoff reference:
+Obtain the repository revisions from the actual checked-out repositories:
 
-```text
-FCC-tau-workflow:
-82aa6a9
-
-TausFCCee:
-844cc76
+```bash
+git -C /path/to/FCC-tau-workflow rev-parse HEAD
+git -C /path/to/TausFCCee rev-parse HEAD
 ```
 
-This information is enough to distinguish software provenance, detector
-reconstruction, truth association and downstream analysis.
+For a compact human-readable record:
+
+```bash
+git -C /path/to/FCC-tau-workflow log -1 --oneline --decorate
+git -C /path/to/TausFCCee log -1 --oneline --decorate
+```
+
+Do not treat commit identifiers embedded in an older handoff or external
+status snapshot as authoritative.
+
+The checked-out Git revisions, together with the software, detector, input,
+reconstruction, TruthLink and assignment provenance above, are sufficient to
+distinguish software provenance, detector reconstruction, truth association
+and downstream analysis.
