@@ -21,17 +21,18 @@ TausFCCee
     plots and tables
 ```
 
-Reference repository states:
+Maintained repository branches:
 
 ```text
 FCC-tau-workflow
     branch: consolidation/20260901
-    commit: 82aa6a9
 
 TausFCCee
     branch: consolidation/20260901
-    commit: 844cc76
 ```
+
+Use each repository's Git history for the exact revision associated with this
+handoff; do not copy commit identifiers from an external status snapshot.
 
 The main rule is:
 
@@ -42,10 +43,35 @@ The main rule is:
 
 # 1. Software and detector provenance
 
-The current production was made with the following frozen Key4hep nightly:
+The recommended software baseline for new FCC-tau work is Key4hep stable
+2026-04-08.  Source the exact validated stack with:
 
 ```bash
-source /cvmfs/sw-nightlies.hsf.org/key4hep/releases/2026-08-21/x86_64-almalinux9-gcc14.2.0-opt/key4hep-stack/2026-08-21-5qmpe6/setup.sh
+source /cvmfs/sw.hsf.org/key4hep/releases/2026-04-08/x86_64-almalinux9-gcc14.2.0-opt/key4hep-stack/2026-04-08-i6h4f2/setup.sh
+```
+
+The equivalent convenience command is:
+
+```bash
+source /cvmfs/sw.hsf.org/key4hep/setup.sh -r 2026-04-08
+```
+
+Resolved components include:
+
+```text
+Marlin:      1.19.6
+MarlinReco:  1.38
+k4geo:       00-24
+DD4hep:      1.36
+```
+
+The frozen local ILDConfig checkout used in this study is:
+
+```text
+/lhome/ific/a/airqui/FCC/fcc-tau-dependencies/ILDConfig
+
+commit:
+279b180a88597e45dfaf84f35d1b8b5358300079
 ```
 
 Detector:
@@ -54,11 +80,25 @@ Detector:
 ILD_FCCee_v01
 ```
 
-ILDConfig:
+Geometry SHA256:
 
 ```text
-commit:
-279b180a88597e45dfaf84f35d1b8b5358300079
+ab48a78ef69f6ee417233e34cffa75a0fd41742fb02130c57303f402abd87e29
+```
+
+The detector compact file can normally be obtained after sourcing Key4hep as:
+
+```bash
+export COMPACT_FILE="$k4geo_DIR/FCCee/ILD_FCCee/compact/ILD_FCCee_v01/ILD_FCCee_v01.xml"
+```
+
+## Historical nightly provenance
+
+The old reference and Talk2 results retain the following production
+provenance:
+
+```bash
+source /cvmfs/sw-nightlies.hsf.org/key4hep/releases/2026-08-21/x86_64-almalinux9-gcc14.2.0-opt/key4hep-stack/2026-08-21-5qmpe6/setup.sh
 ```
 
 MarlinReco provenance relevant for the truth linker:
@@ -77,40 +117,11 @@ library:
 libMarlinReco.so
 ```
 
-Geometry SHA256:
-
-```text
-ab48a78ef69f6ee417233e34cffa75a0fd41742fb02130c57303f402abd87e29
-```
-
-The detector compact file can normally be obtained after sourcing Key4hep as:
-
-```bash
-export COMPACT_FILE="$k4geo_DIR/FCCee/ILD_FCCee/compact/ILD_FCCee_v01/ILD_FCCee_v01.xml"
-```
-
-## Important note about nightlies
-
-The existing results must be reproduced with the frozen `2026-08-21`
-nightly above.
-
-For future long-lived productions it is preferable to migrate to a stable
-Key4hep release, but that migration must be validated independently.
-
-At the time of this handoff, the stable release exposed by:
-
-```bash
-source /cvmfs/sw.hsf.org/key4hep/setup.sh
-```
-
-is:
-
-```text
-2026-04-08
-```
-
-Do not silently replace the frozen nightly by that release when reproducing
-the current results.
+The exact nightly CVMFS stack is no longer available.  It remains the
+provenance of the old results because it was the environment used to produce
+them, not because the study identified a nightly-only reconstruction feature.
+New work should use stable 2026-04-08 unless a study explicitly requires and
+validates another release.  Do not rewrite the provenance of old results.
 
 ---
 
@@ -274,43 +285,34 @@ Thus:
 
 ---
 
-# 6. REC -> REC + TruthLinkV1
+# 6. Stable reconstruction with integrated TruthLinkV1
 
-Truth linking is currently added as a second processing step after
-reconstruction.
-
-Conceptually:
+On stable Key4hep 2026-04-08, do not run TruthLinkV1 as a second-pass Marlin
+job.  A standalone pass fails before linking while converting the previously
+written REC from EDM4hep to LCIO:
 
 ```text
-REC
- |
- | standard Marlin processor:
- | RecoMCTruthLinker
- v
-REC + TruthLinkV1 collections
+REC -> k4MarlinWrapper -> EDM4hep-to-LCIO conversion -> failure
 ```
 
-This is equivalent in spirit to reading a REC with an extra Marlin processor
-and writing a new REC containing additional collections.
+This was reproduced with a harmless one-event `Statusmonitor` pass containing
+neither `RecoMCTruthLinker` nor an output writer.  It is therefore a stable
+release I/O/conversion workflow constraint, not evidence of a
+`RecoMCTruthLinker` physics or algorithm problem.
+
+The validated stable workflow is:
+
+```text
+SIM
+ -> reconstruction
+ -> RecoMCTruthLinker in the same k4run process
+ -> REC + TruthLinkV1
+ -> L_direct
+ -> L_ancestor
+```
 
 The standard processor `RecoMCTruthLinker` is used unmodified from
 `MarlinReco`. FCC-tau only configures it.
-
-Maintained entry point:
-
-```text
-FCC-tau-workflow/scripts/workflow/run_truthlink_linker_v1.py
-```
-
-Typical execution:
-
-```bash
-export TRUTHLINK_INPUT_REC="$REC_FILE"
-export TRUTHLINK_OUTPUT_REC="$LINKED_REC"
-export TRUTHLINK_EVTMAX=-1
-
-k4run scripts/workflow/run_truthlink_linker_v1.py
-```
 
 Important configuration:
 
@@ -335,27 +337,80 @@ ClusterMCTruthLinkTruthlinkV1
 
 ---
 
-# 7. Why TruthLinkV1 is added after reconstruction
+# 7. Stable workflow constraints and reproducibility
 
-There is no fundamental requirement to run it separately. In principle the
-`RecoMCTruthLinker` processor could be inserted into the main reconstruction
-sequence.
+Use the standard unmodified `RecoMCTruthLinker` configuration above inside the
+reconstruction process, after Pandora PFO production and before final REC
+writing.  Do not strip ParticleID collections or alter Pandora as a workaround,
+and do not reopen the stable REC in a second-pass Marlin job.
 
-The current workflow deliberately keeps:
+The integrated workflow was repeated on the same ten P8O SIM events.  Event 2
+had 20 versus 18 `MarlinTrkTracks`; no interpretation is assigned to that
+low-level difference.  The analysis-level products were identical:
+
+- PandoraPFO multiplicities and total (86 versus 86);
+- PFO type/PDG, momentum, energy, and charge;
+- all 86 L_direct assignments;
+- all 86 L_ancestor assignments.
+
+Conclusion: **ANALYSIS-LEVEL REPRODUCIBLE**.
+
+## 7.1 Stable P8O/P8H 10k campaign
+
+The controlled campaign is stored under:
 
 ```text
-SIM -> REC
-REC -> REC_TruthlinkV1
+/lustre/ific.uv.es/prj/gl/abehep.flc/FCC/P8_stable20260408_AB_10k/
 ```
 
-because this has practical advantages:
+P8O starts from historical existing SIM; P8H starts from PYTHIA 20260909
+HepMC and stable simulation.  Both then use stable reconstruction with
+integrated TruthLinkV1 and the same L_direct and L_ancestor definitions.
 
-- truth linking can be rerun without repeating reconstruction;
-- reconstruction products remain unchanged;
-- the exact truth-link configuration is easy to isolate and validate;
-- no scientific information is lost by doing it afterwards.
+| Quantity | P8O | P8H |
+|---|---:|---:|
+| Events | 10,000 | 10,000 |
+| MCParticles | 1,224,250 | 977,321 |
+| PandoraPFOs | 61,326 | 61,009 |
+| L_direct assigned | 61,323 | 61,006 |
+| L_direct ambiguous | 3 | 3 |
+| L_ancestor direct | 48,795 | 49,117 |
+| L_ancestor promoted | 12,476 | 11,871 |
+| No qualifying analysis-truth ancestor | 52 | 18 |
+| Direct unassigned | 3 | 3 |
 
-Therefore the current two-stage implementation is intentional and valid.
+The raw MC bookkeeping differs substantially, but the maintained
+analysis-truth populations are very similar.  Analysis-truth photons number
+53,718 for P8O and 53,988 for P8H; neither sample has parentless
+analysis-truth photons.  Raw L_direct unique assignment is approximately
+99.995% in both samples.  This raw PFO-to-any-MC success must not be confused
+with truth-species association efficiency.
+
+## 7.2 Photon residual headline
+
+For L_ancestor-associated photons:
+
+| Sample | N | p median | p h68 | theta median [mrad] | theta h68 [mrad] |
+|---|---:|---:|---:|---:|---:|
+| Historical P8O/nightly | 40,627 | -0.01102 | 0.13986 | 0.2457 | 12.2535 |
+| P8O stable | 22,496 | -0.01104 | 0.13909 | 0.3293 | 12.2486 |
+| P8H stable | 22,904 | -0.01027 | 0.14164 | 0.1767 | 12.1975 |
+
+The broad photon theta component is robust.  Neither P8O-to-P8H nor
+stable-to-historical-nightly changes its width materially, and the raw
+generator-bookkeeping difference does not propagate into a materially
+different selected photon response.  This observation does not motivate a
+further generator campaign.  A future photon-specific reconstruction or
+association study may investigate the absolute approximately 12 mrad width,
+but it should not be framed as a PYTHIA or Key4hep-release regression.
+
+Terminology remains deliberately limited by stored genealogy:
+
+```text
+tau-origin photon != FSR
+non-tau photon    != ISR
+parentless photon != ISR
+```
 
 ---
 
